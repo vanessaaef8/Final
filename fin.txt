@@ -1,6 +1,6 @@
 streamlit
+yfinance
 matplotlib
 pandas
-numpy
-yfinance
-matplotlib.pyplot
+requests
+
