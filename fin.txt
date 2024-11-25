@@ -3,4 +3,4 @@ yfinance
 matplotlib
 pandas
 requests
-
+yahoo_fin
