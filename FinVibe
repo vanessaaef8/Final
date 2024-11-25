@@ -1,83 +1,83 @@
 import streamlit as st
 import numpy as np
+import pandas as pd
 import matplotlib.pyplot as plt
+from yahoo_fin import stock_info as si  # Para datos financieros en tiempo real
 
 # Configuración general
 st.set_page_config(page_title="Planificación Financiera", layout="wide")
 
 # Título principal
-st.title("📊 Planificación Financiera Personal")
-st.subheader("Gestiona tus metas: Casa en 10 años y Retiro a largo plazo")
+st.title("💰 Planificación Financiera Inteligente")
+st.subheader("Gestiona tus inversiones y metas financieras de manera eficiente")
 
 # Crear pestañas
-tab1, tab2, tab3 = st.tabs(["🏠 Comprar Casa", "🪙 Planificación para el Retiro", "⚙️ Personalización de Gastos"])
+tab1, tab2, tab3 = st.tabs(["📈 Inversiones Diversificadas", "🏖️ Planificación para el Retiro", "🛍️ Personalización de Gastos"])
 
-# Pestaña: Comprar Casa
+# Pestaña: Inversiones Diversificadas
 with tab1:
-    st.header("Planificación para Comprar Casa")
-    # Entradas del usuario
-    casa_costo = st.number_input("Costo estimado de la casa:", min_value=100000.0, value=1500000.0, step=10000.0)
-    ahorros_actuales = st.number_input("Ahorros actuales:", min_value=0.0, value=100000.0, step=10000.0)
-    plazo_años = st.slider("Plazo para la compra (años):", min_value=5, max_value=20, value=10)
-    inflacion = st.slider("Inflación anual esperada (%):", min_value=0.0, max_value=10.0, value=3.0, step=0.1)
-    rendimiento = st.slider("Rendimiento anual de inversión (%):", min_value=0.0, max_value=15.0, value=6.0, step=0.1)
+    st.header("¿Dónde Invertir Mi Dinero?")
     
-    # Cálculos
-    inflacion_factor = (1 + inflacion / 100) ** plazo_años
-    costo_futuro = casa_costo * inflacion_factor
-    ahorro_necesario = (costo_futuro - ahorros_actuales) / (plazo_años * 12)
-
-    # Resultados
-    st.write(f"**Costo futuro de la casa**: ${costo_futuro:,.2f}")
-    st.write(f"**Ahorro mensual necesario**: ${ahorro_necesario:,.2f}")
-
-    # Gráfica de proyección
-    meses = np.arange(1, plazo_años * 12 + 1)
-    ahorro_proyectado = ahorros_actuales + ahorro_necesario * meses
+    # Entradas del usuario
+    monto_inversion = st.number_input("Monto disponible para invertir ($):", min_value=1000.0, value=50000.0, step=1000.0)
+    plazo_años = st.slider("Plazo de inversión (años):", min_value=1, max_value=20, value=10)
+    objetivo_casa = st.number_input("Objetivo para la casa ($):", min_value=50000.0, value=1500000.0, step=50000.0)
+    
+    # Simulación de tasas (valores reales de ejemplo)
+    tasa_cetes = 10.0  # Supuesta tasa de CETES anual
+    tasa_cripto = 50.0  # Riesgo alto
+    tasa_fondos = 12.0  # Fondos indexados
+    
+    st.write("Suposición de tasas anuales: CETES (10%), Criptomonedas (50%), Fondos Indexados (12%)")
+    
+    # Distribución inicial (personalizable)
+    distribucion = {"CETES": 0.5, "Criptomonedas": 0.2, "Fondos Indexados": 0.3}
+    
+    # Proyección
+    inversiones = {tipo: monto_inversion * porcentaje for tipo, porcentaje in distribucion.items()}
+    proyecciones = {tipo: monto * (1 + tasa / 100) ** plazo_años for tipo, (monto, tasa) in zip(inversiones.keys(), zip(inversiones.values(), [tasa_cetes, tasa_cripto, tasa_fondos]))}
+    total_proyectado = sum(proyecciones.values())
+    
+    st.write(f"**Total proyectado después de {plazo_años} años**: ${total_proyectado:,.2f}")
+    
+    # Gráfica de barras
     plt.figure(figsize=(10, 5))
-    plt.plot(meses, ahorro_proyectado, label="Ahorros Proyectados", color='purple')
-    plt.axhline(y=costo_futuro, color='red', linestyle='--', label="Meta (Costo Futuro)")
-    plt.xlabel("Meses")
-    plt.ylabel("Ahorros")
-    plt.title("Proyección de Ahorros para Comprar Casa")
-    plt.legend()
+    plt.bar(proyecciones.keys(), proyecciones.values(), color=['blue', 'orange', 'green'])
+    plt.title("Proyección por Tipo de Inversión")
+    plt.xlabel("Tipo de Inversión")
+    plt.ylabel("Monto Final ($)")
     st.pyplot(plt)
 
 # Pestaña: Planificación para el Retiro
 with tab2:
     st.header("Planificación para el Retiro")
-    # Entradas del usuario
-    edad_actual = st.number_input("Tu edad actual:", min_value=18, max_value=100, value=22)
-    edad_retiro = st.number_input("Edad deseada de retiro:", min_value=40, max_value=100, value=65)
-    gastos_mensuales = st.number_input("Gastos mensuales estimados en retiro:", min_value=0.0, value=20000.0, step=1000.0)
-    ahorro_actual = st.number_input("Ahorro actual para el retiro:", min_value=0.0, value=50000.0, step=5000.0)
-    rendimiento_retiro = st.slider("Rendimiento anual de inversión (%):", min_value=0.0, max_value=15.0, value=5.0, step=0.1)
-    inflacion_retiro = st.slider("Inflación anual esperada (%):", min_value=0.0, max_value=10.0, value=3.0, step=0.1)
-
+    # Entradas
+    edad_actual = st.number_input("Edad actual:", min_value=18, max_value=100, value=25)
+    edad_retiro = st.number_input("Edad de retiro:", min_value=40, max_value=100, value=65)
+    gastos_retiro = st.number_input("Gastos mensuales estimados en retiro ($):", min_value=1000.0, value=20000.0, step=1000.0)
+    ahorro_actual_retiro = st.number_input("Ahorros actuales para el retiro ($):", min_value=0.0, value=50000.0, step=5000.0)
+    
     # Cálculos
     años_retiro = edad_retiro - edad_actual
-    gastos_futuros = gastos_mensuales * (1 + inflacion_retiro / 100) ** años_retiro
-    capital_necesario = gastos_futuros * 12 * (edad_retiro - 85)  # Supone 20 años de retiro
-    ahorro_mensual_retiro = (capital_necesario - ahorro_actual) / (años_retiro * 12)
-
-    # Resultados
-    st.write(f"**Gastos mensuales ajustados por inflación**: ${gastos_futuros:,.2f}")
-    st.write(f"**Capital necesario para el retiro**: ${capital_necesario:,.2f}")
-    st.write(f"**Ahorro mensual necesario**: ${ahorro_mensual_retiro:,.2f}")
-
-    # Gráfica de proyección
-    meses_retiro = np.arange(1, años_retiro * 12 + 1)
-    ahorro_proyectado_retiro = ahorro_actual + ahorro_mensual_retiro * meses_retiro
-    plt.figure(figsize=(10, 5))
-    plt.plot(meses_retiro, ahorro_proyectado_retiro, label="Ahorros Proyectados para Retiro", color='blue')
-    plt.axhline(y=capital_necesario, color='red', linestyle='--', label="Meta (Capital Necesario)")
-    plt.xlabel("Meses")
-    plt.ylabel("Ahorros")
-    plt.title("Proyección de Ahorros para el Retiro")
-    plt.legend()
-    st.pyplot(plt)
+    capital_retiro = gastos_retiro * 12 * 20  # Supone 20 años de retiro
+    ahorro_mensual_necesario = (capital_retiro - ahorro_actual_retiro) / (años_retiro * 12)
+    
+    st.write(f"**Capital necesario para el retiro:** ${capital_retiro:,.2f}")
+    st.write(f"**Ahorro mensual necesario:** ${ahorro_mensual_necesario:,.2f}")
 
 # Pestaña: Personalización de Gastos
 with tab3:
     st.header("Personalización de Gastos")
-    st.write("**(Próximamente)** Personaliza tus gastos anuales y observa cómo afectan tus metas.")
+    st.write("Registra y ajusta tus gastos mensuales.")
+    categorias = ["Alimentos", "Renta", "Transporte", "Entretenimiento", "Otros"]
+    gastos = {categoria: st.number_input(f"Gastos en {categoria} ($):", min_value=0.0, value=1000.0) for categoria in categorias}
+    total_gastos = sum(gastos.values())
+    
+    st.write(f"**Total de gastos mensuales registrados:** ${total_gastos:,.2f}")
+    
+    # Gráfica circular
+    plt.figure(figsize=(7, 7))
+    plt.pie(gastos.values(), labels=gastos.keys(), autopct="%1.1f%%", startangle=90)
+    plt.title("Distribución de Gastos")
+    st.pyplot(plt)
+
